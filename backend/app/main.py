@@ -8,7 +8,7 @@ from app.utils.path import static_files_path
 from app.api.auth import router as auth_router
 from app.api.admin import router as admin_router
 
-version = "v1"
+version = "v1.0"
 schedular = AsyncIOScheduler()
 
 async def init_db():
