@@ -1,0 +1,17 @@
+.env
+*__init__.py
+__pycache__
+*.pyc
+migrations
+venv/
+.venv/
+
+# Redis dump
+dump.rdb
+
+# Node
+node_modules/
+
+# Build files
+dist/
+build/
