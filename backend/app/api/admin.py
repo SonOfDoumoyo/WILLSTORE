@@ -64,8 +64,8 @@ async def log_in(remember_me: bool, login_data: LoginModel, session: AsyncSessio
         )
 
     user_data = {
-        'uid': str(user.uid),
         'email': str(user.email),
+        'uid': str(user.uid),
     }
 
     access_token, apayload = create_access_token(user_data=user_data)

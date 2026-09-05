@@ -1,5 +1,6 @@
 from itsdangerous import URLSafeTimedSerializer
 from ..config import settings
+from fastapi.exceptions import HTTPException
 import logging
 import jwt
 from datetime import datetime, timedelta, timezone
@@ -38,10 +39,16 @@ def decode_token(token: str):
         return token_data
 
     except jwt.ExpiredSignatureError:
-        raise
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Access token has expired"
+        )
 
     except jwt.InvalidTokenError:
-        raise
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid access token"
+        )
 
 
 def create_access_token(user_data: dict, expiry: timedelta = None, refresh: bool = False):

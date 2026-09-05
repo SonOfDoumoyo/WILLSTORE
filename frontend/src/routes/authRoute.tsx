@@ -13,7 +13,7 @@ export function getUserFunc () {
 
         async function fetchUser() {
             try {
-                const res = await api.get("/user/current_user");
+                const res = await api.get("/auth/current_user");
                 if (!cancelled) {const user = res.data; setCurrentUser(user)}
             }catch (err: unknown){
                 if (cancelled) return;

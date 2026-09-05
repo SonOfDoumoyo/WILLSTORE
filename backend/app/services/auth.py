@@ -22,6 +22,14 @@ class AuthService:
 
         return user
 
+    
+    async def get_uid_user(self, uid: uuid.UUID, session: AsyncSession):
+        statement = select(User).where(User.uid == uid)
+        user = (await session.execute(statement)).scalars().one_or_none()
+
+        return user
+
+
     async def create_user(self, user_data: dict, session: AsyncSession):
         existing_user = self.get_user(email=user_data['email'], session=session)
 

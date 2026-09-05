@@ -25,7 +25,7 @@ export function UserProvider({children}:{children: React.ReactNode}){
     const fetchUser = useCallback(async () => {
         try{
             setLoading(true);
-            const res = await api.get("/user/current_user", {withCredentials: true});
+            const res = await api.get("/auth/current_user", {withCredentials: true});
             setCurrentUser(res.data);
 
         }catch(err: unknown){

@@ -12,7 +12,7 @@ class AbstractUserDataModel(BaseModel):
     firstname: str
     lastname: str
     role: str
-    verified: str
+    verified: bool
     status: str
     created_at: datetime
 
@@ -26,7 +26,7 @@ class UserDataModel(BaseModel):
     email: str
     fullname: str
     role: str
-    verified: str
+    verified: bool
     status: str
     created_at: datetime
     updated_at: datetime

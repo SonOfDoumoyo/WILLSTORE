@@ -20,7 +20,7 @@ class AccessTokenBearer(HTTPBearer):
         if not token:
             raise HTTPException(
                 detail="missing access token",
-                status=status.HTTP_401_UNAUTHORIZED
+                status_code=status.HTTP_401_UNAUTHORIZED
             )
         
         tib = await token_in_blocklist(token)
@@ -34,13 +34,13 @@ class AccessTokenBearer(HTTPBearer):
         if token_data is None:
             raise HTTPException(
                 detail="invalid access token",
-                status=status.HTTP_401_UNAUTHORIZED
+                status_code=status.HTTP_401_UNAUTHORIZED
             )
 
         if token_data['refresh']:
             raise HTTPException(
                 detail="access token required",
-                status=status.HTTP_401_UNAUTHORIZED
+                status_code=status.HTTP_401_UNAUTHORIZED
             )
 
         uid = token_data.get("user").get("uid")
@@ -49,13 +49,13 @@ class AccessTokenBearer(HTTPBearer):
         if stored_token is None:
             raise HTTPException(
                 detail="access token expired",
-                status=status.HTTP_403_FORBIDDEN
+                status_code=status.HTTP_403_FORBIDDEN
             )
         
         if stored_token != token_data:
             raise HTTPException(
-                detail="access token revoked",
-                status=status.HTTP_403_FORBIDDEN
+                detail=f"access token revoked {stored_token, token_data}",
+                status_code=status.HTTP_403_FORBIDDEN
             )
         
         return token_data
@@ -67,24 +67,24 @@ class RefreshTokenBearer(HTTPBearer):
         super().__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Dict[str, Any]:
-        token = request.cookies.get("access_token")
+        token = request.cookies.get("refresh_token")
         if not token:
             raise HTTPException(
-                detail="missing access token",
-                status=status.HTTP_401_UNAUTHORIZED
+                detail=f"missing refresh token {token}",
+                status_code=status.HTTP_401_UNAUTHORIZED
             )
         
         token_data = await asyncio.to_thread(decode_token, token)
         if token_data is None:
             raise HTTPException(
-                detail="invalid access token",
-                status=status.HTTP_401_UNAUTHORIZED
+                detail="invalid refresh token",
+                status_code=status.HTTP_401_UNAUTHORIZED
             )
 
-        if token_data['refresh']:
+        if not token_data['refresh']:
             raise HTTPException(
-                detail="access token required",
-                status=status.HTTP_401_UNAUTHORIZED
+                detail="refresh token required",
+                status_code=status.HTTP_401_UNAUTHORIZED
             )
 
         uid = token_data.get("user").get("uid")
@@ -92,14 +92,14 @@ class RefreshTokenBearer(HTTPBearer):
 
         if stored_token is None:
             raise HTTPException(
-                detail="access token expired",
-                status=status.HTTP_403_FORBIDDEN
+                detail="refresh token expired",
+                status_code=status.HTTP_403_FORBIDDEN
             )
         
         if stored_token != token_data:
             raise HTTPException(
-                detail="access token revoked",
-                status=status.HTTP_403_FORBIDDEN
+                detail="refresh token revoked",
+                status_code=status.HTTP_403_FORBIDDEN
             )
         
         return token_data
@@ -119,7 +119,7 @@ class ValidUser:
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if not active_user.is_verified:
+        if not active_user.verified:
             raise HTTPException(
                 detail="account not verified",
                 status=status.HTTP_401_UNAUTHORIZED

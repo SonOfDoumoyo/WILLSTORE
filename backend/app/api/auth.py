@@ -3,8 +3,9 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import session
-from app.core.dependencies import AccessTokenBearer, RefreshTokenBearer
+from app.core.dependencies import AccessTokenBearer, RefreshTokenBearer, get_this_user
 from app.schemas.auth import SignUpModel, LoginModel
+from app.schemas.user import UserDataModel
 from app.services.auth import AuthService
 from app.utils.validators import create_url_safe_token, create_access_token, create_refresh_token
 from app.utils.mail import send_email_verification_email
@@ -15,10 +16,21 @@ from app.utils.redis import store_access_token, store_refresh_token
 
 router = APIRouter()
 auth_service = AuthService()
-REFRESH_TOKEN_EXPIRY = 7
+REFRESH_TOKEN_EXPIRY = 604800
 
 
 template = Jinja2Templates(template_path)
+
+
+@router.get("/current_user")
+async def get_user(user: UserDataModel = Depends(get_this_user)):
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="user no dey"
+        )
+    return user
+
 
 @router.post("/refresh_access")
 async def refresh_access_token(
@@ -28,20 +40,19 @@ async def refresh_access_token(
     session: AsyncSession = Depends(session),
 ):
 
-    user_uid = token_details.get("user").get("user_uid")
+    user_uid = token_details.get("user").get("uid")
     user_email = token_details.get("user").get("email")
-    finger_print = token_details.get("user").get("finger_print")
 
-    user = await auth_service.get_email_user(email=user_email, session=session)
+    user = await auth_service.get_user(email=user_email, session=session)
     if not user:
         raise UserNotFound()
 
-    user_data = {"email": user.email, "user_uid": str(user.uid), "role": user.role, "finger_print":finger_print}
+    user_data = {"email": user.email, "uid": str(user.uid)}
     new_access_token, access_payload = create_access_token(user_data=user_data)
     if not new_access_token:
         raise InvalidToken()
 
-    await store_access_token(user_uid=user_uid, value=access_payload, finger_print=finger_print)
+    await store_access_token(user_uid=user_uid, value=access_payload)
 
     response = JSONResponse(
         content={
@@ -87,7 +98,7 @@ async def create_account(bg_tasks: BackgroundTasks, request: Request, account_de
     )
 
 
-@router.post("sign_in/{remember_me}")
+@router.post("/sign_in/{remember_me}")
 async def log_in(remember_me: bool, login_data: LoginModel, session: AsyncSession = Depends(session)):
     email = login_data.email
     password = login_data.password
@@ -106,8 +117,8 @@ async def log_in(remember_me: bool, login_data: LoginModel, session: AsyncSessio
         )
 
     user_data = {
-        'uid': str(user.uid),
         'email': str(user.email),
+        'uid': str(user.uid),
     }
 
     access_token, apayload = create_access_token(user_data=user_data)

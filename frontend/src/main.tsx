@@ -1,11 +1,14 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import "./index.css";
+import { createRoot } from "react-dom/client";
+import App from "./App.tsx";
 import "boxicons/css/boxicons.min.css";
+import "./interceptors/interceptors.ts";
+import { SignupProvider } from "./contexts/signupContext.tsx";
+
+
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+  <SignupProvider>
+    <App/>
+  </SignupProvider>
 )

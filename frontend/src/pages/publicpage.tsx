@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 
-
 export default function PublicPage() {
     return (
         <div className="bg-dark-theme">
@@ -9,7 +8,7 @@ export default function PublicPage() {
                 <div className="text-peach text-2xl font-semibold bg-peach/20 p-5 rounded-2xl">Marketplace</div>
                 <div className="flex gap-3 flex-row">
                     <Link to={"/sign-in"} className="bg-gray-200/20 border border-white/10 text-gray-400 rounded-2xl font-semibold text-2xl px-4 py-3 cursor-pointer">Sign In</Link>
-                    <button className="bg-peach text-white px-4 text-2xl font-semibold rounded-2xl py-3 cursor-pointer">Register</button>
+                    <Link to={"/create-account"} className="bg-peach text-white px-4 text-2xl font-semibold rounded-2xl py-3 cursor-pointer">Register</Link>
                 </div>
             </div>
             <div className="p-8">

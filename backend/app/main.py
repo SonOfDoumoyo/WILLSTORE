@@ -4,6 +4,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.core.config import engine
 from sqlmodel import SQLModel
 from contextlib import asynccontextmanager
+from app.middleware.auth_middleware import register_sessionMiddleware
 from app.utils.path import static_files_path
 from app.api.auth import router as auth_router
 from app.api.admin import router as admin_router
@@ -38,6 +39,9 @@ app = FastAPI(
 )
 
 API_PREFIX = f"/api/{version}"
+
+
+register_sessionMiddleware(app)
 
 app.mount("/static", StaticFiles(directory=static_files_path), name="static")
 
